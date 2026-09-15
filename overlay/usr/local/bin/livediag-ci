@@ -10,7 +10,12 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export PATH
 
 out=/dev/console
-[ -w /dev/ttyS0 ] && out=/dev/ttyS0
+for dev in /dev/ttyAMA0 /dev/ttyS0; do
+    if [ -w "$dev" ]; then
+        out=$dev
+        break
+    fi
+done
 exec >"$out" 2>&1
 
 echo "livediag-ci: starting"

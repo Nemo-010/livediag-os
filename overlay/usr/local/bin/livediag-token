@@ -1,12 +1,35 @@
 #!/bin/sh
 # Print the token that marks a special boot, if any.
 #
-# The QEMU harness sets it two ways so it works on every architecture:
-#   -fw_cfg name=opt/livediag/token,string=livediag.ci
-#   -smbios type=1,...,serial=livediag.ci
-# On a normal machine this prints the real hardware serial, which will not
-# contain any "livediag." token.
+# The QEMU harness sets it several ways so it works on every architecture and
+# kernel configuration:
+#   1. -fw_cfg name=opt/livediag/token,string=livediag.ci
+#   2. -smbios type=1,...,serial=livediag.ci
+#   3. a small raw virtio disk holding "livediag.ci"
+# On a normal machine none of these exist; the real hardware serial is printed
+# and it will not contain a "livediag." token.
 
 token=$(cat /sys/firmware/qemu_fw_cfg/by_name/opt/livediag/token/raw 2>/dev/null)
 [ -n "$token" ] || token=$(cat /sys/class/dmi/id/product_serial 2>/dev/null)
+case "$token" in
+livediag.*)
+    printf '%s\n' "$token"
+    exit 0
+    ;;
+esac
+
+# The token may live on a tiny raw disk.  Scanning the first sector of each
+# virtio/SCSI disk works even when fw_cfg and DMI are not available.
+for dev in /dev/vd* /dev/sd* /dev/xvd*; do
+    case "$dev" in *[0-9]) continue ;; esac
+    [ -r "$dev" ] || continue
+    found=$(dd if="$dev" bs=64 count=1 2>/dev/null | tr -d '\0' | head -n1)
+    case "$found" in
+    livediag.*)
+        printf '%s\n' "$found"
+        exit 0
+        ;;
+    esac
+done
+
 printf '%s\n' "$token"
