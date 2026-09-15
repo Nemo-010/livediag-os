@@ -6,6 +6,10 @@ log=/dev/ttyS0
 [ -w "$log" ] || log=/dev/ttyAMA0
 [ -w "$log" ] || log=/dev/null
 
+printf 'LIVEDIAG-AUTOSTART token=%s wayland=%s runtime=%s bus=%s\n' \
+    "${serial:-empty}" "${WAYLAND_DISPLAY:-unset}" \
+    "${XDG_RUNTIME_DIR:-unset}" "${DBUS_SESSION_BUS_ADDRESS:-unset}" >>"$log"
+
 wallpaper=$(/usr/local/bin/livediag-wallpaper 2>/dev/null)
 if [ -n "$wallpaper" ] && [ -r "$wallpaper" ]; then
     swaybg -i "$wallpaper" &
@@ -17,16 +21,20 @@ waybar >/dev/null 2>&1 &
 
 case "$serial" in
 *livediag.video*)
-    # Recording mode: leave a breadcrumb on the serial port so CI failures
-    # are diagnosable, force one small 16:9 mode, and go straight to the
-    # quick suite instead of the greeter.
+    # Recording mode: leave breadcrumbs on the serial port so a blank
+    # recording is explainable, prove GTK can open a window, force one small
+    # 16:9 mode and go straight to the quick suite.
     {
-        echo "LIVEDIAG-DIAG wayland=${WAYLAND_DISPLAY:-unset} display=${DISPLAY:-unset} runtime=${XDG_RUNTIME_DIR:-unset}"
-        echo "LIVEDIAG-DIAG bus=${DBUS_SESSION_BUS_ADDRESS:-unset}"
-        echo "LIVEDIAG-DIAG zenity=$(zenity --version 2>&1)"
-        command -v waybar >/dev/null 2>&1 &&
-            echo "LIVEDIAG-DIAG waybar present" ||
-            echo "LIVEDIAG-DIAG waybar missing"
+        echo "LIVEDIAG-DIAG drm:"
+        ls -l /dev/dri 2>&1
+        echo "LIVEDIAG-DIAG runtime:"
+        ls -l "$XDG_RUNTIME_DIR" 2>&1
+        command -v zenity >/dev/null 2>&1 &&
+            echo "LIVEDIAG-DIAG zenity present" ||
+            echo "LIVEDIAG-DIAG zenity missing"
+        timeout 25 zenity --info --no-markup --title=livediag \
+            --text="Display check" >/dev/null 2>&1
+        echo "LIVEDIAG-DIAG zenity-info-rc=$?"
     } >>"$log" 2>&1
 
     i=0

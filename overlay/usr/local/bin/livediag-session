@@ -18,11 +18,9 @@ export XDG_CACHE_HOME=/root/.cache
 export XDG_DATA_HOME=/root/.local/share
 mkdir -p "$XDG_CACHE_HOME" "$XDG_DATA_HOME" 2>/dev/null
 
-# Make sure children (waybar, zenity) can find the compositor even if labwc
-# does not export it, and tell GTK which session type this is.
-: "${WAYLAND_DISPLAY:=wayland-0}"
-export WAYLAND_DISPLAY
 export XDG_SESSION_TYPE=wayland
+# Allow software rendering: the CI guests are emulated and have no real GPU.
+export WLR_RENDERER_ALLOW_SOFTWARE=1
 
 # Wait briefly for seatd.  If it never appears, libseat falls back to its
 # builtin backend, which is fine because this session runs as root.
@@ -35,7 +33,10 @@ if [ -S /run/seatd.sock ]; then
     export LIBSEAT_BACKEND=seatd
 fi
 
-# A session bus keeps GTK and portals happy.
+# NOTE: do not export WAYLAND_DISPLAY here.  wlroots would then think it is a
+# nested client on an existing compositor instead of taking the DRM device.
+# labwc creates the socket and exports WAYLAND_DISPLAY to its children itself.
+
 if command -v dbus-run-session >/dev/null 2>&1; then
     exec dbus-run-session -- labwc
 fi
