@@ -18,6 +18,12 @@ export XDG_CACHE_HOME=/root/.cache
 export XDG_DATA_HOME=/root/.local/share
 mkdir -p "$XDG_CACHE_HOME" "$XDG_DATA_HOME" 2>/dev/null
 
+# Make sure children (waybar, zenity) can find the compositor even if labwc
+# does not export it, and tell GTK which session type this is.
+: "${WAYLAND_DISPLAY:=wayland-0}"
+export WAYLAND_DISPLAY
+export XDG_SESSION_TYPE=wayland
+
 # Wait briefly for seatd.  If it never appears, libseat falls back to its
 # builtin backend, which is fine because this session runs as root.
 i=0
@@ -29,4 +35,8 @@ if [ -S /run/seatd.sock ]; then
     export LIBSEAT_BACKEND=seatd
 fi
 
+# A session bus keeps GTK and portals happy.
+if command -v dbus-run-session >/dev/null 2>&1; then
+    exec dbus-run-session -- labwc
+fi
 exec labwc

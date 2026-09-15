@@ -2,6 +2,9 @@
 # labwc session startup.
 
 serial=$(/usr/local/bin/livediag-token 2>/dev/null)
+log=/dev/ttyS0
+[ -w "$log" ] || log=/dev/ttyAMA0
+[ -w "$log" ] || log=/dev/null
 
 wallpaper=$(/usr/local/bin/livediag-wallpaper 2>/dev/null)
 if [ -n "$wallpaper" ] && [ -r "$wallpaper" ]; then
@@ -12,26 +15,37 @@ fi
 
 waybar >/dev/null 2>&1 &
 
-# Recording mode: use one small 16:9 mode on every display type so the CI
-# videos are uniform.  This never runs on a normal boot.
 case "$serial" in
 *livediag.video*)
+    # Recording mode: leave a breadcrumb on the serial port so CI failures
+    # are diagnosable, force one small 16:9 mode, and go straight to the
+    # quick suite instead of the greeter.
+    {
+        echo "LIVEDIAG-DIAG wayland=${WAYLAND_DISPLAY:-unset} display=${DISPLAY:-unset} runtime=${XDG_RUNTIME_DIR:-unset}"
+        echo "LIVEDIAG-DIAG bus=${DBUS_SESSION_BUS_ADDRESS:-unset}"
+        echo "LIVEDIAG-DIAG zenity=$(zenity --version 2>&1)"
+        command -v waybar >/dev/null 2>&1 &&
+            echo "LIVEDIAG-DIAG waybar present" ||
+            echo "LIVEDIAG-DIAG waybar missing"
+    } >>"$log" 2>&1
+
     i=0
     output=""
     while [ "$i" -lt 20 ]; do
-        output=$(wlr-randr 2>/dev/null | awk 'NF && $0 !~ /^[[:space:]]/ { print $1; exit }')
+        output=$(wlr-randr 2>/dev/null |
+            awk 'NF && $0 !~ /^[[:space:]]/ { print $1; exit }')
         [ -n "$output" ] && break
         sleep 0.5
         i=$((i + 1))
     done
     if [ -n "$output" ]; then
-        wlr-randr --output "$output" --mode 1024x576 >/dev/null 2>&1 ||
-            wlr-randr --output "$output" --custom-mode 1024x576 >/dev/null 2>&1 ||
-            true
+        wlr-randr --output "$output" --mode 1024x576 >>"$log" 2>&1 || true
     fi
+    sleep 1
+    /usr/local/bin/livediag-welcome >>"$log" 2>&1 &
+    ;;
+*)
+    sleep 1
+    /usr/local/bin/livediag-welcome &
     ;;
 esac
-
-# Let the compositor settle before the first window appears.
-sleep 1
-/usr/local/bin/livediag-welcome &
