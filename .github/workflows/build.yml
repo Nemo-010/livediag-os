@@ -27,11 +27,11 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # BIOS + extlinux boots in seconds; only aarch64 needs UEFI.
-          - arch: x86_64
-            bootmode: BIOS
-          - arch: aarch64
-            bootmode: UEFI
+          # BIOS + extlinux boots in seconds and is what the QEMU harness
+          # uses.  Real laptops are UEFI, so that image is shipped too.
+          - { arch: x86_64, bootmode: BIOS, name: x86_64 }
+          - { arch: x86_64, bootmode: UEFI, name: x86_64-uefi }
+          - { arch: aarch64, bootmode: UEFI, name: aarch64 }
     steps:
       - uses: actions/checkout@v4
 
@@ -68,8 +68,9 @@ jobs:
         env:
           ARCH: ${{ matrix.arch }}
           BOOTMODE: ${{ matrix.bootmode }}
+          NAME: ${{ matrix.name }}
         run: |
-          image="livediag-alpine-${ARCH}.qcow2"
+          image="livediag-alpine-${NAME}.qcow2"
           sudo ./alpine-make-vm-image \
             --arch "${ARCH}" \
             --kernel-flavor lts \
@@ -87,24 +88,24 @@ jobs:
 
       - name: Compress and checksum
         env:
-          ARCH: ${{ matrix.arch }}
+          NAME: ${{ matrix.name }}
         run: |
-          image="livediag-alpine-${ARCH}.qcow2"
+          image="livediag-alpine-${NAME}.qcow2"
           qemu-img convert -O qcow2 -c "${image}" "${image}.compressed"
           mv "${image}.compressed" "${image}"
-          qemu-img convert -O raw "${image}" "livediag-alpine-${ARCH}.img"
-          gzip -9 "livediag-alpine-${ARCH}.img"
-          sha256sum "${image}" "livediag-alpine-${ARCH}.img.gz" \
-            > "livediag-alpine-${ARCH}.sha256"
-          ls -lh livediag-alpine-"${ARCH}".*
+          qemu-img convert -O raw "${image}" "livediag-alpine-${NAME}.img"
+          gzip -9 "livediag-alpine-${NAME}.img"
+          sha256sum "${image}" "livediag-alpine-${NAME}.img.gz" \
+            > "livediag-alpine-${NAME}.sha256"
+          ls -lh livediag-alpine-"${NAME}".*
 
       - uses: actions/upload-artifact@v4
         with:
-          name: livediag-alpine-${{ matrix.arch }}
+          name: livediag-alpine-${{ matrix.name }}
           path: |
-            livediag-alpine-${{ matrix.arch }}.qcow2
-            livediag-alpine-${{ matrix.arch }}.img.gz
-            livediag-alpine-${{ matrix.arch }}.sha256
+            livediag-alpine-${{ matrix.name }}.qcow2
+            livediag-alpine-${{ matrix.name }}.img.gz
+            livediag-alpine-${{ matrix.name }}.sha256
           if-no-files-found: error
 
   release:

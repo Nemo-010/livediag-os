@@ -32,7 +32,8 @@ trouble.  Change it before using the image for anything but testing.
 
 The image is produced with Alpine's own
 [`alpine-make-vm-image`](https://github.com/alpinelinux/alpine-make-vm-image),
-which installs packages into a chroot and writes a bootable UEFI disk image.
+which installs packages into a chroot and writes a bootable disk image:
+BIOS/extlinux for the fast QEMU image, UEFI for real laptops and aarch64.
 The livediag repository is cloned **during the build**, inside the chroot, and
 installed with its `make install`.  Nothing is vendored.
 
@@ -56,9 +57,32 @@ no desktop shell to fight with.
 
 ## Download
 
-Grab `livediag-alpine-x86_64.qcow2` or `livediag-alpine-aarch64.qcow2` from
-the [releases](../../releases).  A compressed raw image (`*.img.gz`) is
-included for writing to real hardware.
+From the [releases](../../releases), pick the one that matches the machine:
+
+| File | Use it for |
+| --- | --- |
+| `livediag-alpine-x86_64-uefi-*.img.gz` | **a real laptop or desktop** (UEFI, the normal case) |
+| `livediag-alpine-x86_64-*.img.gz` | QEMU or an old BIOS machine |
+| `livediag-alpine-aarch64-*.img.gz` | ARM machines and VMs |
+| `*.qcow2` | QEMU only, do not write it to a stick |
+
+`livediag-alpine-x86_64-uefi-*.img.gz` is the one to hand someone at an
+install party.  The default `x86_64` image is BIOS-only because it boots in
+seconds in CI; UEFI firmware on a modern laptop will not see it at all.
+
+### Writing it to a USB stick
+
+```sh
+gzip -dc livediag-alpine-x86_64-uefi-*.img.gz | sudo dd of=/dev/sdX bs=4M status=progress conv=fsync
+```
+
+Replace `/dev/sdX` with the **USB stick**, never the internal disk.  Check
+with `lsblk` first and say it out loud.  Etcher accepts the `.img.gz`
+directly if you prefer a GUI.
+
+Secure Boot must be off: this image is unsigned, as most test media is.  The
+greeter will not mention it, but `core-firmware` in the report will tell you
+whether it is on.
 
 ## Try it in QEMU
 

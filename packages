@@ -24,6 +24,10 @@ foot
 font-dejavu
 brightnessctl
 wlr-randr
+python3
+py3-gobject3
+gtk+3.0
+feh
 
 # --- networking, Bluetooth and mobile broadband ---------------------------
 networkmanager
@@ -40,6 +44,10 @@ pipewire
 pipewire-pulse
 wireplumber
 alsa-utils
+
+# --- time ----------------------------------------------------------------
+chrony
+chrony-openrc
 
 # --- livediag runtime -----------------------------------------------------
 zenity
