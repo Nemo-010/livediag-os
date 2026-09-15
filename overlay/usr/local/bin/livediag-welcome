@@ -13,13 +13,13 @@ while :; do
         --title="Welcome" \
         --text="Hello, and welcome.
 
-This little system is here to help you find out how this computer feels under Linux.  It runs entirely from this image, so your disks and your files are left alone.
+This little system checks how this computer works under Linux.  It runs entirely from this image, so your disks and your files are left alone.
 
-Whenever you are ready, we can walk through the sound, the Wi-Fi, the keyboard, the battery, the camera and the rest, and at the end you get a plain report you can keep.
+A progress window will follow along while the checks run: it shows what has passed and what is still to come.  If something is missing - a Wi-Fi card whose driver never loads, a battery, a camera - the report says so plainly.
 
 What would you like to do?" \
-        --width=640 --height=440 \
-        --column="What would you like to do?" \
+        --width=640 --height=460 \
+        --column="Choose one" \
         "Start the health check" \
         "Open a terminal" \
         "Reboot" 2>/dev/null) || choice="Start the health check"
