@@ -2,6 +2,12 @@
 # Friendly greeter.  It loops, so closing everything never leaves a blank
 # desktop: the welcome comes back.
 
+# Recording mode: go straight to the quick check so the CI video shows the
+# tests running without anyone needing to click through the welcome.
+case "$(/usr/local/bin/livediag-token 2>/dev/null)" in
+*livediag.video*) exec livediag --quick ;;
+esac
+
 while :; do
     choice=$(zenity --list --no-markup \
         --title="Welcome" \

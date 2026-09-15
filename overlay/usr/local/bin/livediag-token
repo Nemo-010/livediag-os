@@ -1,0 +1,12 @@
+#!/bin/sh
+# Print the token that marks a special boot, if any.
+#
+# The QEMU harness sets it two ways so it works on every architecture:
+#   -fw_cfg name=opt/livediag/token,string=livediag.ci
+#   -smbios type=1,...,serial=livediag.ci
+# On a normal machine this prints the real hardware serial, which will not
+# contain any "livediag." token.
+
+token=$(cat /sys/firmware/qemu_fw_cfg/by_name/opt/livediag/token/raw 2>/dev/null)
+[ -n "$token" ] || token=$(cat /sys/class/dmi/id/product_serial 2>/dev/null)
+printf '%s\n' "$token"
