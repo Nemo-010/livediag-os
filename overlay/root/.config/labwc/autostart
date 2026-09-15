@@ -32,9 +32,9 @@ case "$serial" in
         command -v zenity >/dev/null 2>&1 &&
             echo "LIVEDIAG-DIAG zenity present" ||
             echo "LIVEDIAG-DIAG zenity missing"
-        timeout 25 zenity --info --no-markup --title=livediag \
+        timeout 25 zenity --question --no-markup --timeout=5 --title=livediag \
             --text="Display check" >/dev/null 2>&1
-        echo "LIVEDIAG-DIAG zenity-info-rc=$?"
+        echo "LIVEDIAG-DIAG zenity-question-rc=$?"
     } >>"$log" 2>&1
 
     i=0

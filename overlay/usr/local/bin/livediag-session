@@ -19,8 +19,13 @@ export XDG_DATA_HOME=/root/.local/share
 mkdir -p "$XDG_CACHE_HOME" "$XDG_DATA_HOME" 2>/dev/null
 
 export XDG_SESSION_TYPE=wayland
-# Allow software rendering: the CI guests are emulated and have no real GPU.
+# The CI guests are emulated with no real GPU, and virtio-gpu's GBM
+# swapchain fails there.  Use wlroots' software renderer with dumb buffers
+# and software cursors; it is slower but reliable everywhere.
+export WLR_RENDERER=pixman
 export WLR_RENDERER_ALLOW_SOFTWARE=1
+export WLR_NO_HARDWARE_CURSORS=1
+export LIBGL_ALWAYS_SOFTWARE=1
 
 # Wait briefly for seatd.  If it never appears, libseat falls back to its
 # builtin backend, which is fine because this session runs as root.
