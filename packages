@@ -64,6 +64,10 @@ linuxconsoletools
 cups-client
 git
 make
+curl
+pulseaudio-utils
+util-linux-misc
+sox
 
 # --- firmware for real laptops --------------------------------------------
 # Trim these if you only boot the image in a virtual machine.
