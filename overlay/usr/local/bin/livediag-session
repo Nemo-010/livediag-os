@@ -26,6 +26,11 @@ export WLR_RENDERER=pixman
 export WLR_RENDERER_ALLOW_SOFTWARE=1
 export WLR_NO_HARDWARE_CURSORS=1
 export LIBGL_ALWAYS_SOFTWARE=1
+# GTK4 tries its GL renderer first and segfaults on that combination, so
+# force the cairo renderer and skip the accessibility bus.
+export GDK_BACKEND=wayland
+export GSK_RENDERER=cairo
+export GTK_A11Y=none
 
 # Wait briefly for seatd.  If it never appears, libseat falls back to its
 # builtin backend, which is fine because this session runs as root.

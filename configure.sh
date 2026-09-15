@@ -42,6 +42,8 @@ if ! grep -q 'agetty --autologin' /etc/inittab; then
     printf 'tty1::respawn:/sbin/agetty --autologin root --noclear tty1 38400 linux\n' \
         >> /etc/inittab
 fi
+# Leave the serial port free for CI output instead of a getty prompt.
+sed -i 's#^ttyS0::respawn:#\#ttyS0::respawn:#' /etc/inittab 2>/dev/null || true
 
 step "Install livediag from $LIVEDIAG_REPO ($LIVEDIAG_REF)"
 tmp=$(mktemp -d)
