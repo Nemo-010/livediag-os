@@ -26,7 +26,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x86_64, aarch64]
+        include:
+          # BIOS + extlinux boots in seconds; only aarch64 needs UEFI.
+          - arch: x86_64
+            bootmode: BIOS
+          - arch: aarch64
+            bootmode: UEFI
     steps:
       - uses: actions/checkout@v4
 
@@ -62,12 +67,13 @@ jobs:
       - name: Build the image
         env:
           ARCH: ${{ matrix.arch }}
+          BOOTMODE: ${{ matrix.bootmode }}
         run: |
           image="livediag-alpine-${ARCH}.qcow2"
           sudo ./alpine-make-vm-image \
             --arch "${ARCH}" \
             --kernel-flavor lts \
-            --boot-mode UEFI \
+            --boot-mode "${BOOTMODE}" \
             --image-format qcow2 \
             --image-size 5G \
             --serial-console \
