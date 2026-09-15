@@ -31,7 +31,7 @@ rc-update del mdev sysinit 2>/dev/null || true
 rc-update del hwdrivers sysinit 2>/dev/null || true
 
 step "Enable services"
-for svc in dbus seatd networkmanager bluetooth modemmanager; do
+for svc in dbus seatd networkmanager bluetooth modemmanager local; do
     rc-update add "$svc" default 2>/dev/null || true
 done
 

@@ -1,0 +1,41 @@
+#!/bin/sh
+# Unattended run of the whole livediag suite.
+#
+# Triggered by the SMBIOS product serial containing "livediag.ci", which the
+# QEMU harness sets with -smbios.  Results are printed between markers so the
+# host can read them from the serial console with no network and no shared
+# filesystem.
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+
+out=/dev/console
+[ -w /dev/ttyS0 ] && out=/dev/ttyS0
+exec >"$out" 2>&1
+
+echo "livediag-ci: starting"
+
+# Give the network a moment to come up; the connectivity test copes either way.
+i=0
+while [ "$i" -lt 30 ]; do
+    ip route 2>/dev/null | grep -q '^default' && break
+    sleep 1
+    i=$((i + 1))
+done
+
+livediag --all --non-interactive
+rc=$?
+
+session=$(ls -1d /root/livediag-results/*/ 2>/dev/null | tail -n1)
+
+printf '\n=====LIVEDIAG-RESULTS-BEGIN=====\n'
+if [ -n "$session" ] && [ -r "${session}results.tsv" ]; then
+    cat "${session}results.tsv"
+else
+    printf 'none\t-\tFAIL\tlivediag\tno session was produced\n'
+fi
+printf '=====LIVEDIAG-RESULTS-END=====\n'
+printf '=====LIVEDIAG-EXIT=%s=====\n' "$rc"
+
+sync
+poweroff -f

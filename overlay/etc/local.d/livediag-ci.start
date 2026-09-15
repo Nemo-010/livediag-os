@@ -1,0 +1,6 @@
+#!/bin/sh
+# Run the unattended suite only when the firmware serial marks this as a
+# CI boot.  On a normal boot this file does nothing at all.
+case "$(cat /sys/class/dmi/id/product_serial 2>/dev/null)" in
+*livediag.ci*) /usr/local/bin/livediag-ci ;;
+esac

@@ -70,6 +70,7 @@ jobs:
             --boot-mode UEFI \
             --image-format qcow2 \
             --image-size 5G \
+            --serial-console \
             --repositories-file repositories \
             --packages "$(cat packages.txt)" \
             --fs-skel-dir overlay \

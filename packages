@@ -23,6 +23,7 @@ fuzzel
 foot
 font-dejavu
 brightnessctl
+wlr-randr
 
 # --- networking, Bluetooth and mobile broadband ---------------------------
 networkmanager

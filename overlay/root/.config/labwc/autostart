@@ -1,6 +1,8 @@
 #!/bin/sh
 # labwc session startup.
 
+serial=$(cat /sys/class/dmi/id/product_serial 2>/dev/null)
+
 wallpaper=$(/usr/local/bin/livediag-wallpaper 2>/dev/null)
 if [ -n "$wallpaper" ] && [ -r "$wallpaper" ]; then
     swaybg -i "$wallpaper" &
@@ -9,6 +11,26 @@ else
 fi
 
 waybar >/dev/null 2>&1 &
+
+# Recording mode: use one small 16:9 mode on every display type so the CI
+# videos are uniform.  This never runs on a normal boot.
+case "$serial" in
+*livediag.video*)
+    i=0
+    output=""
+    while [ "$i" -lt 20 ]; do
+        output=$(wlr-randr 2>/dev/null | awk 'NF && $0 !~ /^[[:space:]]/ { print $1; exit }')
+        [ -n "$output" ] && break
+        sleep 0.5
+        i=$((i + 1))
+    done
+    if [ -n "$output" ]; then
+        wlr-randr --output "$output" --mode 1024x576 >/dev/null 2>&1 ||
+            wlr-randr --output "$output" --custom-mode 1024x576 >/dev/null 2>&1 ||
+            true
+    fi
+    ;;
+esac
 
 # Let the compositor settle before the first window appears.
 sleep 1
