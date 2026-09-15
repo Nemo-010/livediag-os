@@ -1,0 +1,77 @@
+# livediag-os package list.  Blank lines and lines starting with # are ignored.
+# One package per line.
+
+# --- Alpine base and session plumbing -------------------------------------
+alpine-base
+alpine-conf
+openrc
+eudev
+udev-init-scripts
+udev-init-scripts-openrc
+dbus
+dbus-openrc
+seatd
+seatd-openrc
+agetty
+ca-certificates
+
+# --- Wayland desktop, deliberately small ----------------------------------
+labwc
+swaybg
+waybar
+fuzzel
+foot
+font-dejavu
+brightnessctl
+
+# --- networking, Bluetooth and mobile broadband ---------------------------
+networkmanager
+networkmanager-openrc
+wpa_supplicant
+iw
+bluez
+bluez-openrc
+modemmanager
+modemmanager-openrc
+
+# --- audio ----------------------------------------------------------------
+pipewire
+pipewire-pulse
+wireplumber
+alsa-utils
+
+# --- livediag runtime -----------------------------------------------------
+zenity
+iproute2
+iputils
+usbutils
+pciutils
+util-linux
+ffmpeg
+mesa-dri-gallium
+mesa-demos
+vulkan-tools
+libinput-tools
+v4l-utils
+lm-sensors
+smartmontools
+upower
+memtester
+iio-sensor-proxy
+fprintd
+linuxconsoletools
+cups-client
+git
+make
+
+# --- firmware for real laptops --------------------------------------------
+# Trim these if you only boot the image in a virtual machine.
+linux-firmware-intel
+linux-firmware-amdgpu
+linux-firmware-rtlwifi
+linux-firmware-rtw88
+linux-firmware-brcm
+linux-firmware-ath10k
+linux-firmware-ath11k
+linux-firmware-ath12k
+linux-firmware-amd-ucode

@@ -1,0 +1,3 @@
+# Extra packages for x86_64 only.
+# CPU microcode updates are architecture-specific; aarch64 does not need them.
+intel-ucode

@@ -1,0 +1,15 @@
+#!/bin/sh
+# labwc session startup.
+
+wallpaper=$(/usr/local/bin/livediag-wallpaper 2>/dev/null)
+if [ -n "$wallpaper" ] && [ -r "$wallpaper" ]; then
+    swaybg -i "$wallpaper" &
+else
+    swaybg -c "#191b28" &
+fi
+
+waybar >/dev/null 2>&1 &
+
+# Let the compositor settle before the first window appears.
+sleep 1
+/usr/local/bin/livediag-welcome &

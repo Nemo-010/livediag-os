@@ -1,0 +1,8 @@
+*.qcow2
+*.img
+*.img.gz
+*.sha256
+packages.txt
+alpine-make-vm-image
+OVMF_VARS.fd
+dist/

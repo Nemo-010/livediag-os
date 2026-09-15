@@ -1,0 +1,32 @@
+#!/bin/sh
+# Friendly greeter.  It loops, so closing everything never leaves a blank
+# desktop: the welcome comes back.
+
+while :; do
+    choice=$(zenity --list --no-markup \
+        --title="Welcome" \
+        --text="Hello, and welcome.
+
+This little system is here to help you find out how this computer feels under Linux.  It runs entirely from this image, so your disks and your files are left alone.
+
+Whenever you are ready, we can walk through the sound, the Wi-Fi, the keyboard, the battery, the camera and the rest, and at the end you get a plain report you can keep.
+
+What would you like to do?" \
+        --width=640 --height=440 \
+        --column="What would you like to do?" \
+        "Start the health check" \
+        "Open a terminal" \
+        "Reboot" 2>/dev/null) || choice="Start the health check"
+
+    case "$choice" in
+    "Open a terminal")
+        foot &
+        ;;
+    "Reboot")
+        /sbin/reboot 2>/dev/null
+        ;;
+    *)
+        livediag
+        ;;
+    esac
+done

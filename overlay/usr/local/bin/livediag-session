@@ -1,0 +1,32 @@
+#!/bin/sh
+# livediag Wayland session.
+#
+# Runs as root from an autologin shell.  There is no login manager: the
+# console comes up, this starts the compositor, and if the compositor exits
+# the console respawns and we come back here.
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH
+
+: "${XDG_RUNTIME_DIR:=/run/user/$(id -u)}"
+export XDG_RUNTIME_DIR
+mkdir -p "$XDG_RUNTIME_DIR" 2>/dev/null
+chmod 700 "$XDG_RUNTIME_DIR" 2>/dev/null
+
+export XDG_CONFIG_HOME=/root/.config
+export XDG_CACHE_HOME=/root/.cache
+export XDG_DATA_HOME=/root/.local/share
+mkdir -p "$XDG_CACHE_HOME" "$XDG_DATA_HOME" 2>/dev/null
+
+# Wait briefly for seatd.  If it never appears, libseat falls back to its
+# builtin backend, which is fine because this session runs as root.
+i=0
+while [ "$i" -lt 20 ] && [ ! -S /run/seatd.sock ]; do
+    sleep 0.5
+    i=$((i + 1))
+done
+if [ -S /run/seatd.sock ]; then
+    export LIBSEAT_BACKEND=seatd
+fi
+
+exec labwc

@@ -1,0 +1,25 @@
+* {
+  font-family: "DejaVu Sans";
+  font-size: 13px;
+  border: none;
+  border-radius: 0;
+}
+
+window#waybar {
+  background: rgba(25, 27, 40, 0.92);
+  color: #ece9f5;
+}
+
+#clock,
+#network,
+#battery {
+  padding: 0 12px;
+}
+
+#battery.warning {
+  color: #f0c674;
+}
+
+#battery.critical {
+  color: #e06c75;
+}

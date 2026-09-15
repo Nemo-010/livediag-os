@@ -1,0 +1,21 @@
+#!/bin/sh
+# Make a soft wallpaper once, then print its path.  Prints nothing if it
+# cannot be made, in which case the session falls back to a solid colour.
+
+dir=/root/.config/livediag
+img=$dir/wallpaper.png
+
+if [ -s "$img" ]; then
+    printf '%s\n' "$img"
+    exit 0
+fi
+
+mkdir -p "$dir" 2>/dev/null
+if command -v ffmpeg >/dev/null 2>&1; then
+    ffmpeg -y -loglevel error \
+        -f lavfi -i 'gradients=s=1920x1080:c0=0x191b28:c1=0x3b2a4d:x0=0:y0=0:x1=1920:y1=1080' \
+        -frames:v 1 "$img" >/dev/null 2>&1 || true
+fi
+
+[ -s "$img" ] && printf '%s\n' "$img"
+exit 0
