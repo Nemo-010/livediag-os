@@ -9,6 +9,13 @@
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 export PATH
 
+# OpenRC's local service runs with a bare environment; give livediag a home
+# and a predictable results directory.
+HOME=/root
+export HOME
+LIVEDIAG_OUTDIR=/root/livediag-results
+export LIVEDIAG_OUTDIR
+
 out=/dev/console
 for dev in /dev/ttyAMA0 /dev/ttyS0; do
     if [ -w "$dev" ]; then
@@ -31,7 +38,8 @@ done
 livediag --all --non-interactive
 rc=$?
 
-session=$(ls -1d /root/livediag-results/*/ 2>/dev/null | tail -n1)
+session=$(ls -1d "$LIVEDIAG_OUTDIR"/*/ 2>/dev/null | tail -n1)
+[ -n "$session" ] || session=$(ls -1d /tmp/livediag-results/*/ 2>/dev/null | tail -n1)
 
 printf '\n=====LIVEDIAG-RESULTS-BEGIN=====\n'
 if [ -n "$session" ] && [ -r "${session}results.tsv" ]; then
